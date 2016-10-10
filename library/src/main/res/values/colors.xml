@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="np_text_color_selected">#d6000000</color>
+    <color name="np_text_color">#8a000000</color>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="np_def_fade_color">true</bool>
+    <bool name="np_def_animate_text_size">true</bool>
+</resources>

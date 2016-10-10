@@ -1,0 +1,13 @@
+<resources>
+    <declare-styleable name="np_NumberPicker">
+        <attr name="np_background" format="string" />
+        <attr name="np_min_number" format="integer"/>
+        <attr name="np_max_number" format="integer"/>
+        <attr name="np_text_size_selected" format="dimension" />
+        <attr name="np_text_size" format="dimension" />
+        <attr name="np_text_color_selected" format="color" />
+        <attr name="np_text_color" format="color" />
+        <attr name="np_fade_text_color" format="boolean" />
+        <attr name="np_animate_text_size" format="boolean" />
+    </declare-styleable>
+</resources>

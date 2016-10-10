@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="np_min_width">100dp</dimen>
+    <dimen name="np_text_size">36sp</dimen>
+    <dimen name="np_text_size_selected">48sp</dimen>
+</resources>
