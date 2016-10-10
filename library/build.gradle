@@ -21,7 +21,29 @@ android {
         }
     }
 }
+def keystorePropertiesFile = rootProject.file("local.properties");
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+bintray {
+    user = keystoreProperties['user']
+    key = keystoreProperties['key']
+    pkg {
+        repo = "NumberPicker"
+        name = 'NumberPicker'
+        userOrg = 'borealisbiz'
+        licenses = ['AGPL-V3']
+        vcsUrl = 'https://github.com/BorealisBiz/NumberPicker.git'
+    }
+    pkg {
+        version {
+            name = '1.0'
+            released = new Date()
+            vcsTag = '1.0.0'
+            publish = true
+        }
+    }
+}
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
