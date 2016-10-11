@@ -1,5 +1,14 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release' // must be applied after your artifact generating plugin (eg. java / com.android.library)
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.3.4'
+    }
+}
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.3"
@@ -21,29 +30,15 @@ android {
         }
     }
 }
-def keystorePropertiesFile = rootProject.file("local.properties");
-def keystoreProperties = new Properties()
-keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
-bintray {
-    user = keystoreProperties['user']
-    key = keystoreProperties['key']
-    pkg {
-        repo = "NumberPicker"
-        name = 'NumberPicker'
-        userOrg = 'borealisbiz'
-        licenses = ['AGPL-V3']
-        vcsUrl = 'https://github.com/BorealisBiz/NumberPicker.git'
-    }
-    pkg {
-        version {
-            name = '1.0'
-            released = new Date()
-            vcsTag = '1.0.0'
-            publish = true
-        }
-    }
+publish {
+    userOrg = 'borealisbiz'
+    groupId = 'biz.borealis.numberpicker'
+    artifactId = 'NumberPicker'
+    publishVersion = '1.0.0'
+    website = 'https://github.com/BorealisBiz/NumberPicker'
 }
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -53,3 +48,4 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.2.1'
     testCompile 'junit:junit:4.12'
 }
+
