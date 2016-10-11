@@ -32,6 +32,7 @@ public class NumberPicker extends LinearLayout {
     private int mTextColor;
     private int mTextColorSelected;
     private boolean mAnimateTextSize, mTextFadeColor;
+    private OnValueChangeListener mOnValueChangeListener;
 
     public NumberPicker(Context context) {
         this(context, null);
@@ -84,7 +85,7 @@ public class NumberPicker extends LinearLayout {
                         calculatePositionAndScroll();
                     } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                         if (mNumberPickerAdapter != null) {
-                            mNumberPickerAdapter.setSelectedItem(-1);
+                            mNumberPickerAdapter.setSelectedItem(NumberPickerAdapter.POSITION_NONE);
                         }
 
                     }
@@ -101,6 +102,14 @@ public class NumberPicker extends LinearLayout {
         mRecyclerView.setAdapter(mNumberPickerAdapter);
         mNumberPickerAdapter.setSelectedItem(1);
         addView(mRecyclerView);
+    }
+
+    public OnValueChangeListener getOnValueChangeListener() {
+        return mOnValueChangeListener;
+    }
+
+    public void setOnValueChangeListener(OnValueChangeListener mOnValueChangeListener) {
+        this.mOnValueChangeListener = mOnValueChangeListener;
     }
 
     public int getMin() {
@@ -149,6 +158,10 @@ public class NumberPicker extends LinearLayout {
 
     public void setTextColorSelected(int mTextColorSelected) {
         this.mTextColorSelected = mTextColorSelected;
+    }
+
+    public int getSelectedNumber() {
+        return mNumberPickerAdapter.getSelectedNumber();
     }
 
     private void calculatePositionAndScroll() {
@@ -202,16 +215,12 @@ public class NumberPicker extends LinearLayout {
 
     private class NumberPickerAdapter extends RecyclerView.Adapter<NumberPickerAdapter.Holder> {
 
-        /**
-         * Padding
-         */
+
         private static final int VIEW_TYPE_PADDING = 0;
-        /**
-         * View
-         */
         private static final int VIEW_TYPE_ITEM = 1;
         private Context mContext;
-        private int selectedItem = -1;
+        public static final int POSITION_NONE = -1;
+        private int selectedItem = POSITION_NONE;
 
         public NumberPickerAdapter(Context context) {
             this.mContext = context;
@@ -286,10 +295,17 @@ public class NumberPicker extends LinearLayout {
 
         public void setSelectedItem(int selectedItem) {
             if (selectedItem != this.selectedItem) {
+                if (mOnValueChangeListener != null && selectedItem != POSITION_NONE) {
+                    mOnValueChangeListener.onValueChanged(mMax - (mMax - mMin) + selectedItem - 1);
+                }
                 this.selectedItem = selectedItem;
                 notifyDataSetChanged();
             }
 
+        }
+
+        public int getSelectedNumber() {
+            return mMax - (mMax - mMin) + selectedItem - 1;
         }
 
         @Override
