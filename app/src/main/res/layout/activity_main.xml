@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="biz.borealis.numberpickerdemo.MainActivity">
 
-    <biz.borealis.numberpicker.NumberPicker
+    <biz.borealis.numberpicker.ValuePicker
         android:id="@+id/np"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

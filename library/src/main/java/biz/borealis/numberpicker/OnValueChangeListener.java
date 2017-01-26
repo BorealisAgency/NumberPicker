@@ -6,6 +6,6 @@ package biz.borealis.numberpicker;
 
 public interface OnValueChangeListener {
 
-    void onValueChanged(int newValue);
+    void onValueChanged(String newValue);
 
 }

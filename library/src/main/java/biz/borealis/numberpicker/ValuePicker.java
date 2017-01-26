@@ -18,7 +18,10 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class NumberPicker extends LinearLayout {
+import java.util.LinkedList;
+import java.util.List;
+
+public class ValuePicker extends LinearLayout {
 
     private float mItemBigHeight;
     private float mItemSmallHeight;
@@ -26,7 +29,7 @@ public class NumberPicker extends LinearLayout {
     private int mMin;
     private int mMax;
     private final RecyclerView mRecyclerView;
-    private NumberPickerAdapter mNumberPickerAdapter;
+    private ValuePickerAdapter mValuePickerAdapter;
     private float mTextSize;
     private float mTextSizeSelected;
     private int mTextColor;
@@ -34,28 +37,28 @@ public class NumberPicker extends LinearLayout {
     private boolean mAnimateTextSize, mTextFadeColor;
     private OnValueChangeListener mOnValueChangeListener;
 
-    public NumberPicker(Context context) {
+    public ValuePicker(Context context) {
         this(context, null);
     }
 
-    public NumberPicker(Context context, AttributeSet attrs) {
+    public ValuePicker(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public NumberPicker(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ValuePicker(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.np_NumberPicker, defStyleAttr, 0);
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.np_ValuePicker, defStyleAttr, 0);
 
         Resources resources = context.getResources();
-        mMin = a.getInt(R.styleable.np_NumberPicker_np_min_number, resources.getInteger(R.integer.np_def_min));
-        mMax = a.getInt(R.styleable.np_NumberPicker_np_min_number, resources.getInteger(R.integer.np_def_max));
-        mTextColor = a.getColor(R.styleable.np_NumberPicker_np_text_color, ContextCompat.getColor(context, R.color.np_text_color));
-        mTextSize = a.getDimension(R.styleable.np_NumberPicker_np_text_size, resources.getDimension(R.dimen.np_text_size));
-        mTextColorSelected = a.getColor(R.styleable.np_NumberPicker_np_text_color, ContextCompat.getColor(context, R.color.np_text_color_selected));
-        mTextSizeSelected = a.getDimension(R.styleable.np_NumberPicker_np_text_size, resources.getDimension(R.dimen.np_text_size_selected));
-        mTextFadeColor = a.getBoolean(R.styleable.np_NumberPicker_np_fade_text_color, resources.getBoolean(R.bool.np_def_fade_color));
-        mAnimateTextSize = a.getBoolean(R.styleable.np_NumberPicker_np_animate_text_size, resources.getBoolean(R.bool.np_def_animate_text_size));
+        mMin = a.getInt(R.styleable.np_ValuePicker_np_min_number, resources.getInteger(R.integer.np_def_min));
+        mMax = a.getInt(R.styleable.np_ValuePicker_np_max_number, resources.getInteger(R.integer.np_def_max));
+        mTextColor = a.getColor(R.styleable.np_ValuePicker_np_text_color, ContextCompat.getColor(context, R.color.np_text_color));
+        mTextSize = a.getDimension(R.styleable.np_ValuePicker_np_text_size, resources.getDimension(R.dimen.np_text_size));
+        mTextColorSelected = a.getColor(R.styleable.np_ValuePicker_np_text_color, ContextCompat.getColor(context, R.color.np_text_color_selected));
+        mTextSizeSelected = a.getDimension(R.styleable.np_ValuePicker_np_text_size, resources.getDimension(R.dimen.np_text_size_selected));
+        mTextFadeColor = a.getBoolean(R.styleable.np_ValuePicker_np_fade_text_color, resources.getBoolean(R.bool.np_def_fade_color));
+        mAnimateTextSize = a.getBoolean(R.styleable.np_ValuePicker_np_animate_text_size, resources.getBoolean(R.bool.np_def_animate_text_size));
 
         a.recycle();
 
@@ -70,7 +73,6 @@ public class NumberPicker extends LinearLayout {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-
         mAllVerticalScroll = 0;
 
         final LinearLayoutManager dateLayoutManager = new LinearLayoutManager(context);
@@ -84,10 +86,9 @@ public class NumberPicker extends LinearLayout {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         calculatePositionAndScroll();
                     } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                        if (mNumberPickerAdapter != null) {
-                            mNumberPickerAdapter.setSelectedItem(NumberPickerAdapter.POSITION_NONE);
+                        if (mValuePickerAdapter != null) {
+                            mValuePickerAdapter.setSelectedIndex(ValuePickerAdapter.POSITION_NONE);
                         }
-
                     }
                 }
             }
@@ -98,9 +99,9 @@ public class NumberPicker extends LinearLayout {
                 mAllVerticalScroll += dy;
             }
         });
-        mNumberPickerAdapter = new NumberPickerAdapter(context);
-        mRecyclerView.setAdapter(mNumberPickerAdapter);
-        mNumberPickerAdapter.setSelectedItem(1);
+        mValuePickerAdapter = new ValuePickerAdapter(context, getMin(), getMax());
+        mRecyclerView.setAdapter(mValuePickerAdapter);
+        mValuePickerAdapter.setSelectedIndex(0);
         addView(mRecyclerView);
     }
 
@@ -110,6 +111,12 @@ public class NumberPicker extends LinearLayout {
 
     public void setOnValueChangeListener(OnValueChangeListener mOnValueChangeListener) {
         this.mOnValueChangeListener = mOnValueChangeListener;
+    }
+
+    public void updateValues(List<String> values) {
+        this.mValuePickerAdapter = new ValuePickerAdapter(getContext(), values);
+        this.mRecyclerView.setAdapter(this.mValuePickerAdapter);
+        this.mValuePickerAdapter.setSelectedIndex(0);
     }
 
     public int getMin() {
@@ -160,8 +167,8 @@ public class NumberPicker extends LinearLayout {
         this.mTextColorSelected = mTextColorSelected;
     }
 
-    public int getSelectedNumber() {
-        return mNumberPickerAdapter.getSelectedNumber();
+    public String getSelectedValue() {
+        return mValuePickerAdapter.getSelectedNumber();
     }
 
     private void calculatePositionAndScroll() {
@@ -185,7 +192,7 @@ public class NumberPicker extends LinearLayout {
         if (missingPxDate != 0) {
             mRecyclerView.smoothScrollBy(0, (int) missingPxDate);
         }
-        mNumberPickerAdapter.setSelectedItem(Math.round(mAllVerticalScroll / mItemSmallHeight) + 1);
+        mValuePickerAdapter.setSelectedAbsoluteIndex(Math.round(mAllVerticalScroll / mItemSmallHeight) + 1);
     }
 
     @NonNull
@@ -213,21 +220,30 @@ public class NumberPicker extends LinearLayout {
         return textView.getMeasuredHeight();
     }
 
-    private class NumberPickerAdapter extends RecyclerView.Adapter<NumberPickerAdapter.Holder> {
-
-
+    private class ValuePickerAdapter extends RecyclerView.Adapter<ValuePickerAdapter.Holder> {
         private static final int VIEW_TYPE_PADDING = 0;
         private static final int VIEW_TYPE_ITEM = 1;
         private Context mContext;
-        public static final int POSITION_NONE = -1;
-        private int selectedItem = POSITION_NONE;
+        static final int POSITION_NONE = -1;
 
-        public NumberPickerAdapter(Context context) {
+        private int selectedItemIndex = POSITION_NONE;
+        private List<String> values;
+
+
+        ValuePickerAdapter(Context context, int min, int max) {
             this.mContext = context;
+            values = new LinkedList<>();
+            for (int i = min; i <= max; i++)
+                values.add("" + i);
+        }
+
+        ValuePickerAdapter(Context context, List<String> values) {
+            this.mContext = context;
+            this.values = values;
         }
 
         @Override
-        public NumberPickerAdapter.Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ValuePickerAdapter.Holder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == VIEW_TYPE_ITEM) {
                 TextView number = getTextView(mContext, mTextSize, mTextSizeSelected);
                 return new ItemHolder(number);
@@ -240,7 +256,7 @@ public class NumberPicker extends LinearLayout {
         }
 
         @Override
-        public void onBindViewHolder(NumberPickerAdapter.Holder holder, int position) {
+        public void onBindViewHolder(ValuePickerAdapter.Holder holder, int position) {
 
             if (holder instanceof PaddingHolder) {
                 PaddingHolder paddingHolder = (PaddingHolder) holder;
@@ -253,8 +269,11 @@ public class NumberPicker extends LinearLayout {
             }
             if (holder instanceof ItemHolder) {
                 final ItemHolder itemHolder = (ItemHolder) holder;
-                itemHolder.number.setText(String.valueOf(mMax - (mMax - mMin) + position - 1)); //minus padding view
-                if (position == selectedItem) {
+                int adjustedPosition = position - 1; // Adjusted position removes the 1st padding
+
+                itemHolder.number.setText(values.get(adjustedPosition)); //minus padding view
+
+                if (adjustedPosition == selectedItemIndex) {
                     if (mTextFadeColor) {
                         final ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), itemHolder.number.getCurrentTextColor(), ContextCompat.getColor(mContext, R.color.np_text_color_selected));
                         colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -293,24 +312,35 @@ public class NumberPicker extends LinearLayout {
             return VIEW_TYPE_ITEM;
         }
 
-        public void setSelectedItem(int selectedItem) {
-            if (selectedItem != this.selectedItem) {
-                if (mOnValueChangeListener != null && selectedItem != POSITION_NONE) {
-                    mOnValueChangeListener.onValueChanged(mMax - (mMax - mMin) + selectedItem - 1);
+        void setSelectedAbsoluteIndex(int absoluteIndex) {
+            if (getItemViewType(absoluteIndex) == VIEW_TYPE_PADDING) {
+                setSelectedIndex(POSITION_NONE);
+                return;
+            }
+            setSelectedIndex(absoluteIndex - 1); // Adjust to position index
+        }
+
+        void setSelectedIndex(int selectedIndex) {
+            if (selectedIndex != this.selectedItemIndex) {
+                if (mOnValueChangeListener != null && selectedIndex != POSITION_NONE) {
+                    mOnValueChangeListener.onValueChanged(values.get(selectedIndex));
                 }
-                this.selectedItem = selectedItem;
+                this.selectedItemIndex = selectedIndex;
                 notifyDataSetChanged();
             }
 
         }
 
-        public int getSelectedNumber() {
-            return mMax - (mMax - mMin) + selectedItem - 1;
+        String getSelectedNumber() {
+            if (selectedItemIndex == POSITION_NONE) {
+                return "";
+            }
+            return values.get(selectedItemIndex);
         }
 
         @Override
         public int getItemCount() {
-            return mMax - mMin + 3; // calculate number of items plus 2 padding
+            return values.size() + 2; // calculate number of items plus 2 padding
         }
 
         private class PaddingHolder extends Holder {
