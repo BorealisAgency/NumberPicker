@@ -1,5 +1,5 @@
 <resources>
-    <declare-styleable name="np_NumberPicker">
+    <declare-styleable name="np_ValuePicker">
         <attr name="np_background" format="string" />
         <attr name="np_min_number" format="integer"/>
         <attr name="np_max_number" format="integer"/>
